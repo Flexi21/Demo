@@ -175,6 +175,7 @@ ssize_t SensorManager::Info::removeBatchParamsForIdent(SensorConnection *connect
     return idx;
 }
 
+//zwl
 void SensorManager::addSensorsList(sensor_t const *list, size_t count) {
     mActivationCount.setCapacity(count);
     Info model;
@@ -438,4 +439,3 @@ int SensorManager::setEvent(sensors_event_t *data, int moudle) {
     mSensorContext->setEvent(data, moudle);
     return 0;
 }
-
