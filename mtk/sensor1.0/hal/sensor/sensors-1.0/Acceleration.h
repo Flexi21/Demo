@@ -50,7 +50,7 @@
 #include "SensorSaved.h"
 #include "SensorCalibration.h"
 #include "hwmsen_custom.h"
-
+//c++ :为继承的意思
 class AccelerationSensor : public SensorBase {
 private:
     int mEnabled;

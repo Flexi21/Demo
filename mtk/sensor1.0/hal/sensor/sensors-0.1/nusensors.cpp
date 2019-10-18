@@ -76,7 +76,7 @@
 struct sensors_poll_context_t {
     struct sensors_poll_device_1 device;// must be first
 
-        sensors_poll_context_t();
+        sensors_poll_context_t();  //构造函数
         ~sensors_poll_context_t();
     int activate(int handle, int enabled);
     int setDelay(int handle, int64_t ns);

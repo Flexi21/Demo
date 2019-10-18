@@ -71,8 +71,8 @@ Sensors::Sensors()
     } else {
         err = hw_get_module(
             SENSORS_HARDWARE_MODULE_ID,
-            (hw_module_t const **)&mSensorModule);
-    }
+            (hw_module_t const **)&mSensorModule); //传进去的是强制转换成 hw_module_t的类型,出来后就是 sensors_poll_device_1的指针类型(sensors_poll_device_1 变量和
+    }                                              //其第一个结构体成员（hw_device_t common）的地址是一样的)
     if (mSensorModule == NULL) {
         err = UNKNOWN_ERROR;
     }
@@ -88,7 +88,7 @@ Sensors::Sensors()
         return;
     }
 
-    err = sensors_open_1(&mSensorModule->common, &mSensorDevice);
+    err = sensors_open_1(&mSensorModule->common, &mSensorDevice); // it real open :
 
     if (err != OK) {
         LOG(ERROR) << "Couldn't open device for module "
