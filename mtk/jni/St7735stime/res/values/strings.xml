@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">St7735s</string>
+    <string name="cust1">一行显示测试</string>
+    <string name="cust2">两行显示测试</string>
+    <string name="cust3">多行显示测试</string>
+    <string name="cust4">showChar</string>
+    <string name="cust5">setPos</string>
+    <string name="cust6">clearZoon</string>
+    <string name="cust7">stopRoll</string>
+</resources>
+

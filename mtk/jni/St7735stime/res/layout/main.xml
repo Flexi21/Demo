@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.android.St7735s">
+
+    <Button
+        android:id="@+id/button01"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cust1" />
+    <Button
+        android:id="@+id/button02"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cust2" />
+    <Button
+        android:id="@+id/button03"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cust3" />
+    <Button
+        android:id="@+id/button04"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cust4" />
+    <Button
+        android:id="@+id/button05"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cust5" />
+    <Button
+        android:id="@+id/button06"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cust6" />
+    <Button
+        android:id="@+id/button07"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cust7" />
+</LinearLayout>
