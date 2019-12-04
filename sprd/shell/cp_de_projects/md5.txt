@@ -1,0 +1,2 @@
+f454bd0285315990a7321c8788ce6a55  clone_project.sh
+c6e1340504335a704ac48599e57973ea  delete_project.sh
