@@ -101,6 +101,11 @@ Prebuild()
 	boarddir=`get_build_var BOARDDIR`
 	PROJ_NAME=`echo $boarddir | sed 's/device\/sprd\/sharkle\///'`
 
+	## Kernel
+	rm -rf out/target/product/$PROJ_NAME/obj/KERNEL/arch/arm/boot/dts/
+	## Uboot
+	rm -rf out/target/product/$PROJ_NAME/obj/u-boot15/drivers/video/sprdfb/lcd/
+	## System
 	rm -rf out/target/product/$PROJ_NAME/system/build.prop
 }
 
