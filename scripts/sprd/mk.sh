@@ -91,7 +91,7 @@ Unzip_prop()
 		fi
 	fi
 
-	if [[ "$BOARD_CONFIG" = "GV40_NAND_CONFIG" ]] | [[ "$BOARD_CONFIG" = "GV40_EMMC_CONFIG" ]];then
+	if [[ "$BOARD_CONFIG" = "GV40_NAND_CONFIG" ]] || [[ "$BOARD_CONFIG" = "GV40_EMMC_CONFIG" ]];then
 		CustomerSet
 	fi
 }
@@ -133,6 +133,7 @@ ProjectSelect()
 	echo "$boarddir"
 	BOARD_CONFIG=`grep "JM_BOARD_CONFIG" $boarddir/ProjectConfig.mk` 
 	BOARD_CONFIG=`echo $BOARD_CONFIG | cut -d '=' -f 2 |sed "s/^[ \t]*//g"`	
+	echo "$BOARD_CONFIG"
 }
 
 ##  bootloader    : fdl2-sign.bin u-boot-sign.bin u-boot_autopoweron-sign.bin
