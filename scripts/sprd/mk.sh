@@ -91,7 +91,10 @@ Unzip_prop()
 		fi
 	fi
 
-	if [[ "$BOARD_CONFIG" = "GV40_NAND_CONFIG" ]] || [[ "$BOARD_CONFIG" = "GV40_EMMC_CONFIG" ]];then
+	temp=`echo $BOARD_CONFIG |grep -c GV40_NAND_CONFIG`
+    temp1=`echo $BOARD_CONFIG |grep -c GV40_EMMC_CONFIG`
+	#if [[ "$BOARD_CONFIG" = "GV40_NAND_CONFIG" ]] || [[ "$BOARD_CONFIG" = "GV40_EMMC_CONFIG" ]];then
+	if [ $temp = "1" ] || [ $temp1 = "1" ];then
 		CustomerSet
 	fi
 }
