@@ -4,6 +4,66 @@ BUILD_DEFAULT_EVRIONMENT="yes"
 
 BOARD_CONFIG="node"
 
+
+#### below is for vl01c 
+choice=0
+MODEM_BINS_F="device/sprd/sharkle/sp9820e_2h10/modem_bins/ltenvitem.bin"
+
+CUST_ITEM=(
+	"LMO"
+	"MXC"
+);
+
+NVITEM_PATH=(
+	"customer_nvitem/LMO/vl01c_lm_gsm-b2b5_wcdma-b1b2b5b8_fdd-b1b2b3b4b5b7b8b28ab_w19_15_customer_nvitem.bin"	##LMO NVITEM
+	"customer_nvitem/MXC/vl01c_mxc_gsm-b2b5_wcdma-b2b5_fdd-b2b4b5b7b12b66_p19_15_customer_nvitem.bin"			##MXC NVITEM
+);
+
+fselect(){
+	local line
+	local index=1
+	for line in ${CUST_ITEM[@]}; do
+		printf "%6s %s\n" "[$index]" $line
+    	index=$(($index + 1))
+	done
+	echo -n "Select one: "
+    unset choice
+    read choice
+	if [[ $choice -gt ${#CUST_ITEM[@]} || $choice -lt 1 ]]; then
+		echo "Invalid choice!!"
+		exit 1
+	fi
+}
+
+nvitem_cp() {
+	temp=`expr $choice - 1`
+	echo " "
+	echo -e "\e[1;32m 3: \e[0m"
+	echo -e "\e[1;32m copy ${CUST_ITEM[$temp]} nvitem begin...! \e[0m"  
+	if [ -e ${NVITEM_PATH[$temp]} ];then 
+		cp ${NVITEM_PATH[$temp]} $MODEM_BINS_F
+		checksum1=`md5sum ${NVITEM_PATH[$temp]} |cut -d " " -f 1`
+		checksum2=`md5sum $MODEM_BINS_F |cut -d " " -f 1`
+		echo "checksum1: $checksum1" 
+		echo "checksum2: $checksum2"
+		if [ "$checksum1" != "$checksum2" ];then
+			echo -e "\e[1;31m Warning!!! ${CUST_ITEM[$temp]} Nvitem checsum failed, please check!!\e[0m"
+			exit 1
+		fi
+	else
+		echo -e "\e[1;31m Warning!!! ${CUST_ITEM[$temp]} Nvitem file no found, please check!!\e[0m"
+		exit 1
+	fi
+	echo -e "\e[1;32m copy ${CUST_ITEM[$temp]} nvitem ok! \e[0m"  
+}
+
+vl01c_nvcp()
+{
+	fselect
+	nvitem_cp
+}
+#### vl01c end #####################
+
 CustomerSet()
 {
 	boarddir=`get_build_var BOARDDIR`
@@ -93,10 +153,16 @@ Unzip_prop()
 
 	temp=`echo $BOARD_CONFIG |grep -c GV40_NAND_CONFIG`
     temp1=`echo $BOARD_CONFIG |grep -c GV40_EMMC_CONFIG`
+	temp2=`echo $BOARD_CONFIG |grep -c VL01C_CONFIG`
 	#if [[ "$BOARD_CONFIG" = "GV40_NAND_CONFIG" ]] || [[ "$BOARD_CONFIG" = "GV40_EMMC_CONFIG" ]];then
 	if [ $temp = "1" ] || [ $temp1 = "1" ];then
 		CustomerSet
 	fi
+	
+	if [ $temp2 = "1" ];then
+		vl01c_nvcp
+	fi
+
 }
 
 Prebuild()
