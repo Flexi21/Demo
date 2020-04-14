@@ -8,6 +8,7 @@ BOARD_CONFIG="node"
 #### below is for vl01c 
 choice=0
 MODEM_BINS_F="device/sprd/sharkle/sp9820e_2h10/modem_bins/ltenvitem.bin"
+OTHERS_IMAGE_NV_F=`ls Other_images/*nvitem.bin`
 
 CUST_ITEM=(
 	"LMO"
@@ -22,16 +23,30 @@ NVITEM_PATH=(
 fselect(){
 	local line
 	local index=1
-	for line in ${CUST_ITEM[@]}; do
-		printf "%6s %s\n" "[$index]" $line
-    	index=$(($index + 1))
-	done
-	echo -n "Select one: "
-    unset choice
-    read choice
-	if [[ $choice -gt ${#CUST_ITEM[@]} || $choice -lt 1 ]]; then
-		echo "Invalid choice!!"
-		exit 1
+
+	if [ -f "./myProjectNv" ];then
+		myProjectNv=$(head -1 ./myProjectNv)
+		for line in ${CUST_ITEM[@]}; do
+			if [ ${CUST_ITEM[$line]} = $myProjectNv ];then
+				choice=$index
+				return 0
+			fi
+			index=$(($index + 1))
+		done
+		echo -e "\e[1:31m myProjectNv congfig is error \e[0m"
+		exit 1;
+	else
+		for line in ${CUST_ITEM[@]}; do
+			printf "%6s %s\n" "[$index]" $line
+			index=$(($index + 1))
+		done
+		echo -n "Select one: "
+		unset choice
+		read choice
+		if [[ $choice -gt ${#CUST_ITEM[@]} || $choice -lt 1 ]]; then
+			echo "Invalid choice!!"
+			exit 1
+		fi
 	fi
 }
 
@@ -46,6 +61,12 @@ nvitem_cp() {
 		checksum2=`md5sum $MODEM_BINS_F |cut -d " " -f 1`
 		echo "checksum1: $checksum1" 
 		echo "checksum2: $checksum2"
+
+		if [ -e $OTHERS_IMAGE_NV_F ];then
+			rm -rf $OTHERS_IMAGE_NV_F
+		fi		
+		cp ${NVITEM_PATH[$temp]} Other_images/
+
 		if [ "$checksum1" != "$checksum2" ];then
 			echo -e "\e[1;31m Warning!!! ${CUST_ITEM[$temp]} Nvitem checsum failed, please check!!\e[0m"
 			exit 1
