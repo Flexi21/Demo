@@ -2,12 +2,13 @@
 BUILDTYPE="none"
 BUILD_DEFAULT_EVRIONMENT="yes"
 
-BOARD_CONFIG="node"
+BOARD_CONFIG="none"
+NV_CONFIG="none"
+MODEM_BINS_F="none"
 
 
 #### below is for vl01c 
 choice=0
-MODEM_BINS_F="device/sprd/sharkle/sp9820e_2h10/modem_bins/ltenvitem.bin"
 OTHERS_IMAGE_NV_F=`ls Other_images/*nvitem.bin`
 
 CUST_ITEM=(
@@ -84,6 +85,39 @@ vl01c_nvcp()
 	nvitem_cp
 }
 #### vl01c end #####################
+
+
+common_cp_v2()
+{
+	num="${#NV_CONFIG[@]}"
+	if [ "$num" != "1" ];then
+		echo "NV_CONFIG num is uncorrect!!!!"
+		exit 1
+	fi
+
+	if [ -e $OTHERS_IMAGE_NV_F ];then
+		rm -rf $OTHERS_IMAGE_NV_F
+	fi		
+	
+	if [ -d Other_images/ ];then
+		cp $NV_CONFIG Other_images/
+	fi
+
+	cp $NV_CONFIG $MODEM_BINS_F
+	checksum1=`md5sum $NV_CONFIG | cut -d " " -f 1 | sed "s/^[ \t]//g"`
+	checksum2=`md5sum $MODEM_BINS_F | cut -d " " -f 1 | sed "s/^[ \t]//g"`
+	checksum3=`md5sum Other_images/*nvitem.bin | cut -d " " -f 1 | sed "s/^[ \t]//g"`
+	echo "checksum1: $checksum1" 
+	echo "checksum2: $checksum2"	
+	echo "checksum3: $checksum3"
+
+	if [ "$checksum1" != "$checksum2" ] || [ "$checksum1" != "$checksum3" ] ;then
+		echo -e "\e[1;31m Warning!!! ${CUST_ITEM[$temp]} Nvitem checsum failed, please check!!\e[0m"
+		exit 1
+	fi
+}
+
+
 
 CustomerSet()
 {
@@ -181,7 +215,8 @@ Unzip_prop()
 	fi
 	
 	if [ $temp2 = "1" ];then
-		vl01c_nvcp
+		#vl01c_nvcp
+		common_cp_v2
 	fi
 
 }
@@ -223,7 +258,15 @@ ProjectSelect()
 	echo "$boarddir"
 	BOARD_CONFIG=`grep "JM_BOARD_CONFIG" $boarddir/ProjectConfig.mk` 
 	BOARD_CONFIG=`echo $BOARD_CONFIG | cut -d '=' -f 2 |sed "s/^[ \t]*//g"`	
-	echo "$BOARD_CONFIG"
+	echo "BOARD_CONFIG $BOARD_CONFIG"
+
+	NV_CONFIG=`grep "CUSTOMER_NVCONFIG" $boarddir/ProjectConfig.mk` 
+	NV_CONFIG=`echo $NV_CONFIG | cut -d '=' -f 2 |sed "s/^[ \t]*//g"`	
+	NV_CONFIG=`find customer_nvitem -name $NV_CONFIG`
+	echo "NV_CONFIG $NV_CONFIG"
+
+	MODEM_BINS_F="$boarddir/modem_bins/ltenvitem.bin"
+
 }
 
 ##  bootloader    : fdl2-sign.bin u-boot-sign.bin u-boot_autopoweron-sign.bin
