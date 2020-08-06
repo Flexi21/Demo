@@ -244,7 +244,12 @@ EnviromentSet()
 	if [ -e lunch_history ];then
 		rm ./lunch_history
 	fi
+	
+	## some computer no need we set environment
+	if [ -e mbldenv.sh ];then 
 	source mbldenv.sh
+	fi
+
 	source build/envsetup.sh
 }
 
