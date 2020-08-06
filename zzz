@@ -1,0 +1,211 @@
+#!/bin/bash
+
+!/bin/bash
+## get activity android.intent.action.MAIN
+
+Getint(){
+ 	i=1
+	while [ $i -le 100 ]
+	do
+	adb shell "cat /proc/interrupts | grep -i nfc" 
+	sleep 1;
+	done
+}
+
+function gettop
+{
+    local TOPFILE=build/core/envsetup.mk
+    if [ -n "$TOP" -a -f "$TOP/$TOPFILE" ] ; then
+        echo $TOP
+    else
+        if [ -f $TOPFILE ] ; then
+            # The following circumlocution (repeated below as well) ensures
+            # that we record the true directory name and not one that is
+            # faked up with symlink names.
+            PWD= /bin/pwd
+        else
+            local HERE=$PWD
+            T=
+            while [ \( ! \( -f $TOPFILE \) \) -a \( $PWD != "/" \) ]; do
+                \cd ..
+                T=`PWD= /bin/pwd`
+            done
+            \cd $HERE
+            if [ -f "$T/$TOPFILE" ]; then
+                echo $T
+            fi
+        fi
+    fi
+}
+
+function dtci() {
+#    if [[ -z "$1" ]]; then
+#        echo "Usage: dtci <regex>"
+#        return
+#    fi
+    T=$(gettop)
+#    if [[ ! -f $T/filelist ]]; then
+#        echo -n "Creating index..."
+#        (\cd $T; find . -wholename ./out -prune -o -wholename ./.repo -prune -o -type f > filelist)
+#        echo " Done"
+#        echo ""
+#    fi
+    local lines
+    #lines=($(\find out/ -name "*.dtb"))
+    lines=($(\find out/ -not -path "*u-boot15*"  -name "*.dtb"))
+    if [[ ${#lines[@]} = 0 ]]; then
+        echo "Not found"
+        return
+    fi
+    local pathname
+    local choice
+    if [[ ${#lines[@]} > 1 ]]; then
+        while [[ -z "$pathname" ]]; do
+            local index=1
+            local line
+            for line in ${lines[@]}; do
+                printf "%6s %s\n" "[$index]" $line
+                index=$(($index + 1))
+            done
+            echo
+            echo -n "Select one: "
+            unset choice
+            read choice
+            if [[ $choice -gt ${#lines[@]} || $choice -lt 1 ]]; then
+                echo "Invalid choice"
+                continue
+            fi
+            pathname=${lines[$(($choice-1))]}
+        done
+    else
+        pathname=${lines[0]}
+    fi
+    /usr/sbin/dtc -I dtb $T/$pathname -O dts
+}
+
+if [[ $1 == "83781" ]];then
+        adb shell am start com.sprd.engineermode/.EngineeModeActivity
+elif [[ $1 == "sprdlog" ]];then
+        adb shell am start com.sprd.engineermode/.debuglog.slogui.SlogUICommonControl
+elif [[ $1 == "sprdclog" ]];then
+adb "wait-for-device";adb root;sleep 2;adb remount;adb shell "rm -rf data/slog/";adb shell "ls -l /data/slog/"
+elif [[ $1 == "getsoc" ]];then
+        adb shell "cat /sys/class/power_supply/battery/capacity"
+elif [[ $1 == "k_dir" ]];then
+        gedit /home/zwl/projects/misc/kernel/k_dir.txt
+elif [[ $1 == "power" ]];then
+        adb shell "input keyevent 26"
+elif [[ $1 == "mlog" ]];then
+        adb shell am start com.mediatek.mtklogger/.MainActivity
+elif [[ $1 == "int" ]];then
+        Getint
+elif [[ $1 == "home" ]];then
+        adb shell input keyevent 3
+elif [[ $1 == "jm" ]];then
+        cat /home/zwl/misc/jm_data/recorder.txt
+elif [[ $1 == "screen" ]];then
+        adb devices
+        java -classpath /home/zwl/tools/screenca/androidscreencast.jar -Xms256M -Xmx512M net.srcz.android.screencast.Main
+elif [[ $1 == "clean" ]];then
+        if [[ $4 != "" ]];then
+                svn st $2 $3 $4 | grep '^?' | sed -n 's/^?[ \t]*//p' | xargs rm -rf {} \;
+        elif [[ $3 != "" ]];then
+                svn st $2 $3 | grep '^?' | sed -n 's/^?[ \t]*//p' | xargs rm -rf {} \;           
+        elif [[ $2 != "" ]];then
+                svn st $2 | grep '^?' | sed -n 's/^?[ \t]*//p' | xargs rm -rf {} \;        
+        else
+                echo "be careful! no params"
+        fi
+svn st    
+elif [[ $1 == "dtc" ]];then
+        if [[ $2 != "" ]];then
+           /usr/sbin/dtc -I dtb $2 -O dts    
+        else
+           #find out/ -name "*.dtb" |grep KERNEL |xargs zzz dtc        
+           dtci
+        fi
+elif [[ $1 == "fuel" ]];then
+        adb shell "setprop ctl.stop fuelgauged && sleep 1 && setprop ctl.start fuelgauged"    
+elif [[ $1 == "sprd" ]];then
+        if [ $# != 2 ];then 
+            echo "params error:"
+            echo "             Usage ./mk.sh sprd .(dir)"
+            exit 1
+        fi          
+        cp ~/projects/misc/github/Demo/scripts/sprd/mk.sh $2
+elif [[ $1 == "mtk" ]];then
+        if [ $# != 2 ];then 
+            echo "params error:"
+            echo "             Usage ./mk.sh mtk .(dir)"
+            exit 1
+        fi
+        cp ~/projects/misc/github/Demo/scripts/mtk/mk.sh $2      
+elif [[ $1 == "back" ]];then
+        adb shell input keyevent 4
+elif [[ $1 == "menu" ]];then
+        adb shell input keyevent 82
+elif [[ $1 == "mp3" ]];then
+        adb root;sleep 2;adb remount; adb push ~/share/phonetest/Music/test.mp3 sdcard/DCIM
+elif [[  $1 == "svnzip" ]];then 
+svn diff -r $2:$3 --summarize |sed -e "s/^A[ \t]//g" |sed -e "s/^M[ \t]//g"
+elif [[  $1 == "sensor" ]];then 
+adb "wait-for-device";adb root;sleep 2;adb remount;adb install -r ~/share/phonetest/sensor/sensors.apk
+elif [[  $1 == "factory" ]];then 
+adb "wait-for-device";adb root;sleep 2;adb remount;adb install -r ~/share/phonetest/FactoryTest_9820e.apk
+elif [[  $1 == "monkey" ]];then 
+adb "wait-for-device";adb root;sleep 2;adb remount; adb shell monkey --ignore-crashes --kill-process-after-error --throttle 250 -v 5000000
+elif [[ $1 == "83781" ]];then
+        adb shell am start com.sprd.engineermode/.EngineerModeActivity
+elif [[ $1 == "83789" ]];then
+       adb shell am start com.sprd.validationtools/.ValidationToolsMainActivity
+elif [[ $1 == "agps" ]];then
+        adb shell am start com.spreadtrum.sgps/.SgpsActivity
+elif [[ $1 == "fs" ]];then
+## native server
+sshfs leo@10.0.18.122:/home/leo/share/ /home/zwl/newdisk/server/native
+## jimi 10.0.18.103 ssd
+sshfs zhangwenlong@10.0.13.108:/mnt/ssd2/zhangwenlong/ /home/zwl/newdisk/server/ssd
+## jimi 10.0.18.103 harddisk
+sshfs zhangwenlong@10.0.13.108:/home/zhangwenlong/projects /home/zwl/newdisk/server/hardisk
+elif [ "$1" = "logui" ];then
+adb shell am broadcast -a com.debug.loggerui.ADB_CMD -e cmd_name start --ei cmd_target 1 -n com.debug.loggerui/.framework.LogReceiver
+elif [ "$1" = "loguis" ];then
+adb shell am broadcast -a com.debug.loggerui.ADB_CMD -e cmd_name stop --ei cmd_target 1 -n com.debug.loggerui/.framework.LogReceiver
+elif [ "$1" = "slog" ];then
+adb shell slogctl enable  
+elif [ "$1" = "slogs" ];then
+adb shell slogctl disable
+else
+echo -e "\033[1;31m Warming! params no found, make sure the params are below \033[0m"
+echo "1: sprdengmode"
+echo "2: sprdlog"
+echo "3: sprdclog"
+echo "4: getsoc"
+echo "5: k_dir"
+echo "6: power"
+echo "7: mtklog"
+echo "8: int"
+echo "9: jm"
+echo "10 :screen"
+echo "11 :clean"
+echo "12 :dtc"
+echo "13 :fuel"
+echo "14 :sprd: for cp mk.sh to dir"
+echo "15 :mtk: for cp mk.sh to dir"
+echo "16 :back"
+echo "17 :menu"
+echo "18 :mp3"
+echo "19 :svnzip"
+echo "20 :home"
+echo "21 :sensor"
+echo "22 :factory"
+echo "23 :monkey"
+echo "24 :83781" 
+echo "25 :83789"
+echo "26 :agps" 
+echo "26 :fs" 
+#rsync --delete-before -d blank/ gv40_driveronly/
+#svn diff -r 18:19 --summarize |sed -e "s/^A[ \t]//g" |sed -e "s/^M[ \t]//g"
+fi
+
+#./build/tools/releasetools/ota_from_target_files -v -n -i ota/old.zip ota/new.zip ota/update.zip
