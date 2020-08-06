@@ -5,6 +5,7 @@ BUILD_DEFAULT_EVRIONMENT="yes"
 BOARD_CONFIG="none"
 NV_CONFIG="none"
 MODEM_BINS_F="none"
+CUSTOMER_PREBUILD="customer_prebuild.sh"
 
 
 #### below is for vl01c 
@@ -85,7 +86,6 @@ vl01c_nvcp()
 	nvitem_cp
 }
 #### vl01c end #####################
-
 
 common_cp_v2()
 {
@@ -218,6 +218,11 @@ Unzip_prop()
 		#vl01c_nvcp
 		common_cp_v2
 	fi
+	
+	if [ -e $CUSTOMER_PREBUILD ];then
+		echo "customer_prebuild start ...."
+		./customer_prebuild.sh $BOARD_CONFIG
+	fi
 
 }
 
@@ -256,14 +261,16 @@ ProjectSelect()
 
 	boarddir=`get_build_var BOARDDIR`
 	echo "$boarddir"
-	BOARD_CONFIG=`grep "JM_BOARD_CONFIG" $boarddir/ProjectConfig.mk` 
-	BOARD_CONFIG=`echo $BOARD_CONFIG | cut -d '=' -f 2 |sed "s/^[ \t]*//g"`	
-	echo "BOARD_CONFIG $BOARD_CONFIG"
+	if [ -e $boarddir/ProjectConfig.mk ];then 
+		BOARD_CONFIG=`grep "JM_BOARD_CONFIG" $boarddir/ProjectConfig.mk` 
+		BOARD_CONFIG=`echo $BOARD_CONFIG | cut -d '=' -f 2 |sed "s/^[ \t]*//g"`	
+		echo "BOARD_CONFIG $BOARD_CONFIG"
 
-	NV_CONFIG=`grep "CUSTOMER_NVCONFIG" $boarddir/ProjectConfig.mk` 
-	NV_CONFIG=`echo $NV_CONFIG | cut -d '=' -f 2 |sed "s/^[ \t]*//g"`	
-	NV_CONFIG=`find customer_nvitem -name $NV_CONFIG`
-	echo "NV_CONFIG $NV_CONFIG"
+		NV_CONFIG=`grep "CUSTOMER_NVCONFIG" $boarddir/ProjectConfig.mk` 
+		NV_CONFIG=`echo $NV_CONFIG | cut -d '=' -f 2 |sed "s/^[ \t]*//g"`	
+		NV_CONFIG=`find customer_nvitem -name $NV_CONFIG`
+		echo "NV_CONFIG $NV_CONFIG"
+	fi
 
 	MODEM_BINS_F="$boarddir/modem_bins/ltenvitem.bin"
 
@@ -306,7 +313,7 @@ PackSoftware()
 	echo "sw_version:$SW_VER"
 
 	#BUILDTYPE=`get_build_var TARGET_BUILD_VARIANT`
-	if [[ $USE_SW_VER == "yes" ]];then ##eg:KA8501_S270_V1.0_190809_6223C [BOARD NAME]_[PROJECT NAME]_[BIG VERSION].[SMALL VERSUON]_[DATA]_[OTHERS]
+	if [[ $USE_SW_VER == "yes" ]];then ##eg:KA8501_S270_V1.0_190809_6223C [BOARD NAME]_[PROJECT NAME]_[BIG VERSION].[SMALL VERSION]_[DATA]_[OTHERS]
 		DIR_FOLDER=${SW_VER%%_20*}"_"$DATE_TIME
 	else
 		DIR_FOLDER=$PROJ_NAME"_"$BUILDTYPE"_"$DATE_TIME   
@@ -429,7 +436,7 @@ fi
 
 EnviromentSet
 ProjectSelect
-OutSelect
+##OutSelect
 Unzip_prop
 Prebuild
 ##Kernelmaro
