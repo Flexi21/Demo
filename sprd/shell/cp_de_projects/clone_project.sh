@@ -71,6 +71,9 @@ chipram_dst2='####Leo#@$(MKCONFIG) $@ arm armv8 '"$DST spreadtrum sharkle"
 pzip_dst1="proprietories-"$DST"_oversea-user.zip"
 pzip_dst2="proprietories-"$DST"_oversea-userdebug.zip"
 
+##vendor
+vendor_src1="vendor/sprd/modules/wcn/connconfig/sharkle/$SRC"
+vendor_dst1="vendor/sprd/modules/wcn/connconfig/sharkle/$DST"
 
 CopyFiles()
 {
@@ -84,6 +87,8 @@ CopyFiles()
     cp     $chipram_src1      $chipram_dst1
 #    cp     $pzip_src1         $pzip_dst1
 #    cp     $pzip_src2         $pzip_dst2    
+##Vendor Wcn file
+    cp -ar $vendor_src1        $vendor_dst1  
 }
 
 FileRename(){
