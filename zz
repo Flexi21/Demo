@@ -1,7 +1,31 @@
 #!/bin/bash
 
-!/bin/bash
-## get activity android.intent.action.MAIN
+#展讯 isupport
+#https://isupport.unisoc.com/iSupport/apply/login#*redirecturl*=ispthome
+#账号NewThinkingSZ08
+#密码SZ08123456
+
+#展讯 cq
+#http://222.66.158.139:2008/cqweb/#
+#账号：NewThinking
+#密码：where25IoFo
+
+#展讯FTP
+#账号：NewThinking
+#密码：78b97PcK
+
+#MTK Online
+#https://online.mediatek.com/
+#concox@iconcox.com
+#2019iconcox!
+
+#MTK文档密码
+#6253959040
+
+#MTK eService
+#https://eservice.mediatek.com/eservice-portal/login;jsessionid=bgmY3EbgSeBelbhF42tLTXGsRvoll5LOLdrjK-Ia34O0P8nZj57G!1436962165
+#GAOXINGXIN-GXQ
+#DCKo03
 
 Getint(){
  	i=1
@@ -84,7 +108,7 @@ function dtci() {
 }
 
 if [[ $1 == "83781" ]];then
-        adb shell am start com.sprd.engineermode/.EngineeModeActivity
+        adb shell am start com.sprd.engineermode/.EngineerModeActivity 
 elif [[ $1 == "sprdlog" ]];then
         adb shell am start com.sprd.engineermode/.debuglog.slogui.SlogUICommonControl
 elif [[ $1 == "sprdclog" ]];then
@@ -132,14 +156,14 @@ elif [[ $1 == "sprd" ]];then
             echo "             Usage ./mk.sh sprd .(dir)"
             exit 1
         fi          
-        cp ~/projects/misc/github/Demo/scripts/sprd/mk.sh $2
+        cp ~/newdisk/misc/github/Demo/scripts/sprd/mk.sh $2
 elif [[ $1 == "mtk" ]];then
         if [ $# != 2 ];then 
             echo "params error:"
             echo "             Usage ./mk.sh mtk .(dir)"
             exit 1
         fi
-        cp ~/projects/misc/github/Demo/scripts/mtk/mk.sh $2      
+        cp ~/newdisk/misc/github/Demo/scripts/mtk/mk.sh $2      
 elif [[ $1 == "back" ]];then
         adb shell input keyevent 4
 elif [[ $1 == "menu" ]];then
@@ -155,7 +179,7 @@ adb "wait-for-device";adb root;sleep 2;adb remount;adb install -r ~/share/phonet
 elif [[  $1 == "monkey" ]];then 
 adb "wait-for-device";adb root;sleep 2;adb remount; adb shell monkey --ignore-crashes --kill-process-after-error --throttle 250 -v 5000000
 elif [[ $1 == "83781" ]];then
-        adb shell am start com.sprd.engineermode/.EngineerModeActivity
+        adb shell am start com.sprd.engineermode/.EngineerModeActivity 
 elif [[ $1 == "83789" ]];then
        adb shell am start com.sprd.validationtools/.ValidationToolsMainActivity
 elif [[ $1 == "agps" ]];then
@@ -167,14 +191,21 @@ sshfs leo@10.0.18.122:/home/leo/share/ /home/zwl/newdisk/server/native
 sshfs zhangwenlong@10.0.13.108:/mnt/ssd2/zhangwenlong/ /home/zwl/newdisk/server/ssd
 ## jimi 10.0.18.103 harddisk
 sshfs zhangwenlong@10.0.13.108:/home/zhangwenlong/projects /home/zwl/newdisk/server/hardisk
+## jimi huizhou huizhou
+sshfs zhangwenlong@172.26.135.228:/home/zhangwenlong /home/zwl/newdisk/server/huizhou
 elif [ "$1" = "logui" ];then
 adb shell am broadcast -a com.debug.loggerui.ADB_CMD -e cmd_name start --ei cmd_target 1 -n com.debug.loggerui/.framework.LogReceiver
 elif [ "$1" = "loguis" ];then
 adb shell am broadcast -a com.debug.loggerui.ADB_CMD -e cmd_name stop --ei cmd_target 1 -n com.debug.loggerui/.framework.LogReceiver
 elif [ "$1" = "slog" ];then
+#android [on/off]   update config file and enable/disable android log
+#modem [on/off]     update config file and enable/disable modem log
+#tcp [on/off]       update config file and enable/disable cap log
+#bt  [on/off]       update config file and enable/disable bluetooth log
 adb shell slogctl enable  
 elif [ "$1" = "slogs" ];then
 adb shell slogctl disable
+adb shell slogctl modem off
 else
 echo -e "\033[1;31m Warming! params no found, make sure the params are below \033[0m"
 echo "1: sprdengmode"
@@ -207,5 +238,23 @@ echo "26 :fs"
 #rsync --delete-before -d blank/ gv40_driveronly/
 #svn diff -r 18:19 --summarize |sed -e "s/^A[ \t]//g" |sed -e "s/^M[ \t]//g"
 fi
-
+## get activity android.intent.action.MAIN
 #./build/tools/releasetools/ota_from_target_files -v -n -i ota/old.zip ota/new.zip ota/update.zip
+
+##	2.3执行命令生成cpp
+##  //生成cpp
+##  hidl-gen -o hello/1.0/default -Lc++-impl -randroid.hardware:hardware/interfaces -randroid.hidl:system/libhidl/transport android.hardware.hello@1.0
+##  //生成Android.bp
+##  hidl-gen -o hello/1.0/default -Landroidbp-impl -randroid.hardware:hardware/interfaces -randroid.hidl:system/libhidl/transport android.hardware.hello@1.0
+##
+
+##rdesktop -u Administrator -p passwd user
+
+##sudo update-alternatives --config java
+
+#1 #define pr_fmt(fmt) "gpio_demo: " fmt
+# #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+# #define pr_fmt(fmt) KBUILD_MODNAME ":%s:%d: " fmt, __func__, __LINE__
+
+#zhangwenlong@172.26.135.228  密码：zhangwenlong 惠州服务器
+
