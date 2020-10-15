@@ -1,0 +1,38 @@
+1.工具及脚本
+	1.1 hidl用于生成Android.bp 和 
+	路径：system/tools/hidl/
+	使用方法：hidl-gen -o output-path -L language (-r interface-root) fqname
+	1.2
+	路径：hardware/interfaces/update-makefiles.sh
+	
+
+2.创建文件
+	2.1创建目录结构，并编写hidl
+	hello/
+	└── 1.0
+		└── IHello.hal
+
+	cat IHello.hal 
+	---
+	package android.hardware.hello@1.0;
+
+	interface IHello {
+		justTest(string name);
+	};
+	---
+	
+	2.2执行update-makefiles.sh生成Android.bp
+	hello/
+	├── 1.0
+	│   ├── Android.bp  //脚本生成的
+	│   ├── Android.mk  //脚本生成的
+	│   └── IHello.hal
+	└── Android.bp      //脚本生成的
+
+	2.3执行命令生成cpp
+	//生成cpp
+	hidl-gen -o hello/1.0/default -Lc++-impl -randroid.hardware:hardware/interfaces -randroid.hidl:system/libhidl/transport android.hardware.hello@1.0
+	//生成Android.bp
+	hidl-gen -o hello/1.0/default -Landroidbp-impl -randroid.hardware:hardware/interfaces -randroid.hidl:system/libhidl/transport android.hardware.hello@1.0
+
+
