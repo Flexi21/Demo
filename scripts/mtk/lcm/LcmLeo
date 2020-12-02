@@ -1,0 +1,166 @@
+#!/bin/bash
+
+## Author : Leo
+## Date   : 2020-10-27
+## Version: V1.0
+## Env    : mtkQ 
+
+LCM_SRC="$1"
+LCM_DST="$2"
+LCM_DST_UP=`echo $LCM_DST | tr -t [a-z] [A-Z]`
+#extern struct LCM_DRIVER otm8019a_wvga_dsi_vdo_haifei_drv;
+
+LCM_LIST_FILE="none"
+
+LCM_LK_LIST_STR1="extern LCM_DRIVER "
+LCM_KERNEL_LIST_STR1="extern struct LCM_DRIVER "
+LCM_LIST_STR="none"
+LCM_LIST_STR_UP="NONE"
+LCM_LIST_STR2="none"
+
+PLATFORM="none"
+PLATFORM_NUM="none"
+IS_LK="no"
+LK_DIR_PATH="../../../../../vendor/mediatek/proprietary/bootable/bootloader/lk/dev/lcm/"
+
+UpdateVar()
+{
+	tmp=`echo $PWD |grep -c kernel`
+	if [ "$tmp" == "1" ];then
+		IS_LK="no"
+		PLATFORM="mt$PLATFORM_NUM"
+		LCM_LIST_STR="$LCM_KERNEL_LIST_STR1$LCM_LIST_STR2;"
+	else
+		IS_LK="yes"
+		PLATFORM="MT$PLATFORM_NUM"
+		LCM_LIST_STR="$LCM_LK_LIST_STR1$LCM_LIST_STR2;"
+	fi
+
+	LCM_LIST_FILE="mt65xx_lcm_list_"$PLATFORM".c"
+
+	echo -e "LCM_DST_UP   :\e[32m $LCM_DST_UP \e[0m"			## OTM8019A_FWVGA_BOE_HANLONG_IPS_JY891I2
+	echo -e "IS_LK        :\e[32m $IS_LK \e[0m"				    ## yes | no
+	echo -e "PLATFORM     :\e[32m $PLATFORM \e[0m"				## MT6580 | mt6580
+	echo -e "LCM_LIST_FILE:\e[32m $LCM_LIST_FILE \e[0m"			## mt65xx_lcm_list_MT6580.c | mt65xx_lcm_list_MT6580.c
+	##echo "LCM_LIST_STR:$LCM_LIST_STR"							## extern LCM_DRIVER otm8019a_fwvga_boe_hanlong_ips_jy891i2_lcm_drv
+	echo -e "LK_DIR_PATH  :\e[32m $LK_DIR_PATH \e[0m"			## PATH for lk lcm
+}
+
+MiscInfo()
+{
+
+	if [ -e "mt6580" ];then
+		PLATFORM_NUM="6580"
+	elif [ -e "mt6739" ];then
+		PLATFORM_NUM="6739"
+	elif [ -e "mt6765" ];then
+		PLATFORM_NUM="6765"
+	else
+		echo -e "\e[31m error: can not get platform info!! \e[0m"
+	fi
+}
+
+
+LcmFileCpCommon(){
+
+	## here, we updae var ensure ,PLATFORM var is correct
+	UpdateVar
+
+	pushd $PLATFORM
+	if [ -e $LCM_SRC ];then
+		if [ -e $LCM_DST ];then
+			echo -e "\e[31m error: DST file:$LCM_DST is exist!! \e[0m"
+		fi
+
+		cp -r $LCM_SRC $LCM_DST 
+		pushd $LCM_DST
+		find . -type f |xargs rename "s/$LCM_SRC/$LCM_DST/"
+		find . -type f |xargs sed -i "s/$LCM_SRC/$LCM_DST/g" 
+		popd
+	else 
+		echo -e "\e[31m error: SRC file:$LCM_DST no found!! \e[0m"
+	fi
+	popd
+	
+}
+
+GetListStrCommon(){
+
+	## here, we updae var ensure ,PLATFORM var is correct
+	UpdateVar
+
+	## Get extern struct LCM_DRIVER xxxx name
+	pushd $PLATFORM
+	if [ -e $LCM_SRC/$LCM_SRC".c" ];then
+		if [ "$IS_LK" == "yes" ];then
+			LCM_LIST_STR2=`grep $LCM_DST $LCM_DST/$LCM_DST".c" | head -1 | cut -d " " -f 2`
+		else
+			LCM_LIST_STR2=`grep $LCM_DST $LCM_DST/$LCM_DST".c" | head -1 | cut -d " " -f 3`
+		fi
+	else
+		echo -e "\e[31m error: file: $LCM_DST/$LCM_SRC".c" is not exit!! \e[0m"
+		exit 1
+	fi
+	
+	if [ "$IS_LK" == "yes" ];then
+		LCM_LIST_STR="$LCM_LK_LIST_STR1$LCM_LIST_STR2;"
+	else
+		LCM_LIST_STR="$LCM_KERNEL_LIST_STR1$LCM_LIST_STR2;"
+	fi
+
+	echo -e "LCM_LIST_STR : \e[32m$LCM_LIST_STR \e[0m"		## extern LCM_DRIVER otm8019a_fwvga_boe_hanlong_ips_jy891i2_lcm_drv
+	
+	popd
+}
+
+ContextChangeCommon(){
+
+	## here, we updae var ensure ,PLATFORM var is correct
+	UpdateVar
+
+	date=$(date +%Y%m%d)
+	
+	## below is kernel part
+	##insert extern struct LCM_DRIVER xxx 
+	sed -i "/LCM_DRIVER $LCM_SRC/a\\$LCM_LIST_STR //Leo $date" "mt65xx_lcm_list_"$PLATFORM".c"
+	
+	## get line num
+	line=`grep -rn "&$LCM_SRC" "mt65xx_lcm_list_"$PLATFORM".c" | cut -d ":" -f 1`
+	## insert #if defined(XXXX)
+	sed -i "`expr $line + 1` a\\#if defined($LCM_DST_UP) //Leo $date" "mt65xx_lcm_list_"$PLATFORM".c"  
+	## insert &xxxx
+	sed -i "`expr $line + 2` a\\	&$LCM_LIST_STR2," "mt65xx_lcm_list_"$PLATFORM".c"  
+	## insert #endif
+	sed -i "`expr $line + 3` a\\#endif" "mt65xx_lcm_list_"$PLATFORM.c""  
+			
+}
+
+
+LcmKernelHandler()
+{
+	LcmFileCpCommon
+	GetListStrCommon
+	ContextChangeCommon
+}
+
+LcmLkHandler()
+{
+	pushd $LK_DIR_PATH
+		UpdateVar
+		LcmFileCpCommon
+		GetListStrCommon
+		ContextChangeCommon
+	popd
+}
+
+
+if [ "$#" != "2" ];then
+	echo  "usage: "
+	echo  "$0 otm8019a_fwvga_boe_hanlong_ips_jy891i2 otm8019a_fwvga_boe_hanlong_jy891i2"
+	exit 1
+fi
+
+
+MiscInfo
+LcmKernelHandler
+LcmLkHandler
